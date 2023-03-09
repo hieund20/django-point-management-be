@@ -19,6 +19,9 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+IS_HEROKU = "DYNO" in os.environ
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -28,8 +31,16 @@ SECRET_KEY = 'django-insecure-4_%k0_!cu@f&f-!kq*4gp7@m=^g$crqxzkiabh9e5k)--%qme-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
 
+if IS_HEROKU:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = []
+
+
+# SECURITY WARNING: don't run with debug turned on in production!
+if not IS_HEROKU:
+    DEBUG = True
 
 # Application definition
 
@@ -97,9 +108,9 @@ WSGI_APPLICATION = 'student_point_management_system_be.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'student_point_management_db',
-        'USER': 'root',
-        'PASSWORD': 'Duchieu200301',
+        'NAME': 'heroku_a73c18e392cc605' if IS_HEROKU == True else 'student_point_management_db',
+        'USER': 'bb5f267cdb23df' if IS_HEROKU == True else 'root',
+        'PASSWORD': '463e2398' if IS_HEROKU == True else 'Duchieu200301',
         'HOST': ''
     }
 }
@@ -147,5 +158,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 django_heroku.settings(locals())
