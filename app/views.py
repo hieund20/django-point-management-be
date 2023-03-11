@@ -46,7 +46,8 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         return Response(data=CourseSerializer(c, many=True).data, status=status.HTTP_200_OK)
     
     @action(methods=['get'], detail=True)
-    def get_scores(self, request, pk):
+    def get_scores_of_course(self, request, pk):
+        # user_id = request.user.id
         course_id = request.query_params.get('course_id')
         s = Score.objects.filter(course=course_id).filter(user=pk).first()
         return Response(data=ScoreSerializer(s).data, status=status.HTTP_200_OK)
@@ -56,7 +57,6 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     #         return [permissions.IsAuthenticated()]
         
     #     return [permissions.AllowAny()]
-
 
 class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
     queryset = Course.objects.filter(active=True)
