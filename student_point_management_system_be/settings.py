@@ -111,7 +111,7 @@ DATABASES = {
         'NAME': 'heroku_a73c18e392cc605' if IS_HEROKU == True else 'student_point_management_db',
         'USER': 'bb5f267cdb23df' if IS_HEROKU == True else 'root',
         'PASSWORD': '463e2398' if IS_HEROKU == True else 'Duchieu200301',
-        'HOST': ''
+        'HOST': 'us-cdbr-east-06.cleardb.net' if IS_HEROKU == True else ''
     }
 }
 
