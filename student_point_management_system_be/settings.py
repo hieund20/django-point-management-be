@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'app.apps.AppConfig',
     'rest_framework',
     'oauth2_provider',
-    'drf_yasg'
+    'drf_yasg',
+    'corsheaders',
 ]
 
 OAUTH2_PROVIDER = {                                                                                                                                                                      
@@ -79,9 +80,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'student_point_management_system_be.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
