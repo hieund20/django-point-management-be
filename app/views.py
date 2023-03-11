@@ -45,11 +45,11 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         c = Course.objects.filter(users=pk)
         return Response(data=CourseSerializer(c, many=True).data, status=status.HTTP_200_OK)
     
-    @action(methods=['get'], detail=True)
-    def get_scores_of_course(self, request, pk):
-        # user_id = request.user.id
+    @action(methods=['get'], detail=False)
+    def get_scores_of_course(self, request, *args, **kwargs):
+        user_id = request.user.id
         course_id = request.query_params.get('course_id')
-        s = Score.objects.filter(course=course_id).filter(user=pk).first()
+        s = Score.objects.filter(course=course_id).filter(user=user_id).first()
         return Response(data=ScoreSerializer(s).data, status=status.HTTP_200_OK)
     
     # def get_permissions(self):
