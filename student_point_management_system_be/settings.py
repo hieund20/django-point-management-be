@@ -108,10 +108,10 @@ WSGI_APPLICATION = 'student_point_management_system_be.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'heroku_a73c18e392cc605' if IS_HEROKU == True else 'student_point_management_db',
-        'USER': 'bb5f267cdb23df' if IS_HEROKU == True else 'root',
-        'PASSWORD': '463e2398' if IS_HEROKU == True else 'Duchieu200301',
-        'HOST': 'us-cdbr-east-06.cleardb.net' if IS_HEROKU == True else ''
+        'NAME': 'cr2satbvl31yogrg' if IS_HEROKU == True else 'student_point_management_db',
+        'USER': 'hhng96gvnmbzverw' if IS_HEROKU == True else 'root',
+        'PASSWORD': 'tf9ruc6tcblujx45' if IS_HEROKU == True else 'Duchieu200301',
+        'HOST': 's29oj5odr85rij2o.cbetxkdyhwsb.us-east-1.rds.amazonaws.com' if IS_HEROKU == True else ''
     }
 }
 
