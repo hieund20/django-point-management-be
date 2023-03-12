@@ -35,7 +35,7 @@ class ScoreViewSet(viewsets.ModelViewSet):
             return Response(data=_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
     
 
-class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
+class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
