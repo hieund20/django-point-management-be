@@ -13,9 +13,9 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'className', 'date_joined']
-        extra_kwargs = {
-            'password': {'write_only': 'true'}
-        }
+        # extra_kwargs = {
+        #     'password': {'write_only': 'true'}
+        # }
 
     def create(self, validated_data):
         user = User(**validated_data)

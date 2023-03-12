@@ -22,6 +22,7 @@ class User(AbstractUser):
     # avatar = models.ImageField
     className = models.CharField(max_length=255, unique=False, null=True)    
     courses = models.ManyToManyField(Course, related_name="users")
+    # is_superuser = models.BooleanField(default=False, editable=False)
     pass
 
 
