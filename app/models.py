@@ -20,8 +20,7 @@ class Course (BaseModel):
 
 class User(AbstractUser):
     # avatar = models.ImageField
-    is_student = models.BooleanField(default=False)
-    className = models.CharField(max_length=255, unique=False)    
+    className = models.CharField(max_length=255, unique=False, null=True)    
     courses = models.ManyToManyField(Course, related_name="users")
     pass
 
