@@ -65,7 +65,7 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
     
     @action(methods=['get'], detail=True)
     def get_students(self, request, pk):
-        u = User.objects.filter(is_student=True).filter(courses=pk)
+        u = User.objects.filter(courses=pk)
         return Response(data=UserSerializer(u, many=True).data, status=status.HTTP_200_OK)
     
 
