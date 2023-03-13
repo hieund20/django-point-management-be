@@ -52,6 +52,12 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         s = Score.objects.filter(course=course_id).filter(user=user_id).first()
         return Response(data=ScoreSerializer(s).data, status=status.HTTP_200_OK)
     
+    @action(methods=['get'], detail=False)
+    def get_current_user(self, request, *args, **kwargs):
+        user_id = request.user.id
+        u = User.objects.filter(id=user_id).first()
+        return Response(data=UserSerializer(u).data, status=status.HTTP_200_OK)
+    
     # def get_permissions(self):
     #     if self.action == 'retrieve':
     #         return [permissions.IsAuthenticated()]
