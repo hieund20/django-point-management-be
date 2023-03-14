@@ -33,6 +33,13 @@ class ScoreViewSet(viewsets.ModelViewSet):
             return Response(data=_serializer.data, status=status.HTTP_201_CREATED) 
         else:
             return Response(data=_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        
+    @action(methods=['get'], detail=False)
+    def get_scores_by_user_and_course(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id')
+        course_id = request.query_params.get('course_id')
+        s = Score.objects.filter(course=course_id).filter(user=user_id).first()
+        return Response(data=ScoreSerializer(s).data, status=status.HTTP_200_OK)
     
 
 class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView):
