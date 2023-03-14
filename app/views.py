@@ -10,7 +10,8 @@ from drf_yasg.utils import swagger_auto_schema
 #csv
 import csv
 from io import TextIOWrapper
-
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 class ScoreViewSet(viewsets.ModelViewSet):
@@ -81,35 +82,50 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
         u = User.objects.filter(courses=pk)
         return Response(data=UserSerializer(u, many=True).data, status=status.HTTP_200_OK)
     
+@method_decorator(csrf_exempt, name='dispatch')
 class CSVHandleView(generics.CreateAPIView):
     parser_classes = (FileUploadParser, MultiPartParser)
 
     @swagger_auto_schema(operation_description='Upload file...',)
     def post(self, request, *args, **kwargs):
-        if 'file' in request.FILES:
-            # Handling csv file before save to database
-            form_data = TextIOWrapper(request.FILES['file'].file, encoding='utf-8')
-            csv_file = csv.reader(form_data)
-            next(csv_file)  # Skip read csv header
+        csv_file = request.data.get('file')
 
-            scores_list = []
+        if not csv_file.name.endswith('.csv'):
+            return Response({'message': 'File không phải định dạng CSV'}, status=status.HTTP_400_BAD_REQUEST)    
 
-            for line in csv_file:
+        # read the CSV file and create instances of your model
+        decoded_file = csv_file.read().decode('utf-8').splitlines()
+        print('decoded_file 1', decoded_file)
+        print('decoded_file', decoded_file[5:])
+        reader = csv.DictReader(
+            decoded_file[5:], 
+            fieldnames=['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'course_id', 'user_id']
+        )
+        print('reader', reader)
+        next(reader)  # Skip read csv header
+        print('reader 2', reader)
+
+        #still have error
+        for line in reader:
+            try:
+                values = list(line.values()) 
                 score = Score()
-                score.score1 = line[0] if line[0] != None else None
-                score.score2 = line[1] if line[1] != None else None
-                score.score3  = line[2] if line[2] != None else None
-                score.score4 = line[3] if line[3] != None else None
-                score.score5 = line[4] if line[4] != None else None
-                score.midterm_score = line[5]
-                score.final_score = line[6]
-                score.user = line[7]
-                score.course = line[8]
-                scores_list.append(score)
+                score.score1 = values[0]  
+                score.score2 = values[1] 
+                score.score3  = values[2] 
+                score.score4 = values[3] 
+                score.score5 = values[4]
+                score.midterm_score = values[5]
+                score.final_score = values[6]
+                score.user = User.objects.filter(pk=values[7]).first() 
+                score.course = Course.objects.filter(pk=values[8]).first()
+                # Save to database
+                Score.objects.create(**score)
+            except KeyError as e:
+                print(f"KeyError: {e}")
+                return Response({'message': 'Có lỗi xảy ra khi Import'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Save to database
-            Score.objects.bulk_create(scores_list)
-            return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)    
+        return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)    
     
 
 def index(request):
