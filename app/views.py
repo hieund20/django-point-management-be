@@ -71,6 +71,16 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         user_id = request.user.id
         u = User.objects.filter(id=user_id).first()
         return Response(data=UserSerializer(u).data, status=status.HTTP_200_OK)
+    
+    @action(methods=['get'], detail=False)
+    def get_user_by_name(self, request, *args, **kwargs):
+        first_name = request.query_params.get('first_name')
+        last_name = request.query_params.get('last_name')
+        if not first_name or not last_name:
+            return Response({'message': 'Hãy nhập Họ và Tên người dùng'}, status=status.HTTP_400_BAD_REQUEST)
+        users = User.objects.filter(first_name__icontains=first_name, last_name__icontains=last_name)
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
     queryset = Course.objects.filter(active=True)
