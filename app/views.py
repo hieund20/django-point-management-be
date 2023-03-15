@@ -21,7 +21,6 @@ class ScoreViewSet(viewsets.ModelViewSet):
     queryset = Score.objects.filter(active=True)
     serializer_class = ScoreSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [FileUploadParser]
     
     def create(self, request, *args, **kwargs):
         score = request.data 
