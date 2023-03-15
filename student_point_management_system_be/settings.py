@@ -19,8 +19,8 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-IS_HEROKU = "DYNO" in os.environ
-# IS_HEROKU = True
+# IS_HEROKU = "DYNO" in os.environ
+IS_HEROKU = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

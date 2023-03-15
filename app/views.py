@@ -7,11 +7,14 @@ from .serializers import ScoreSerializer, CourseSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FileUploadParser
 from drf_yasg.utils import swagger_auto_schema
-#csv
+# csv
 import csv
 from io import TextIOWrapper
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+# email
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your views here.
 class ScoreViewSet(viewsets.ModelViewSet):
@@ -32,6 +35,7 @@ class ScoreViewSet(viewsets.ModelViewSet):
             "score3": score['score3'],
             "score4": score['score4'],
             "score5": score['score5'],
+            "is_draft": score['is_draft'],
             "course": course.pk,
             "user": user.pk,
         }
@@ -42,12 +46,49 @@ class ScoreViewSet(viewsets.ModelViewSet):
         else:
             return Response(data=_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         
+    def update(self, request, pk=None):
+        score = get_object_or_404(Score, pk=pk)
+        score.is_draft = True
+        score.save()
+        return Response(data=self.serializer_class(score).data, status=status.HTTP_200_OK)
+        
     @action(methods=['get'], detail=False)
     def get_score_by_user_and_course(self, request, *args, **kwargs):
         user_id = request.query_params.get('user_id')
         course_id = request.query_params.get('course_id')
         s = Score.objects.filter(course=course_id).filter(user=user_id).first()
         return Response(data=ScoreSerializer(s).data, status=status.HTTP_200_OK)
+    
+    @action(methods=['put'], detail=True)
+    def lock_score(self, request, pk=None):
+        score = get_object_or_404(Score, pk=pk)
+        score.active = False
+        score.save(update_fields=['active'])
+
+        # send email to current user
+        user = request.user
+        subject = f'Thông báo về việc khóa điểm của sinh viên {user.last_name} {user.first_name}'
+        message = f'Điểm của bạn đã bị khóa bởi Giảng viên !'
+        recipient_list = [user.email]
+        send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
+
+        return Response(data=ScoreSerializer(score).data, status=status.HTTP_200_OK)
+    
+    @action(methods=['put'], detail=True)
+    def unlock_score(self, request, pk=None):
+        score = get_object_or_404(Score, pk=pk)
+        score.active = True
+        score.save(update_fields=['active'])
+
+        # send email to current user
+        user = request.user
+        subject = f'Thông báo về việc mở khóa điểm của sinh viên {user.last_name} {user.first_name}'
+        message = f'Điểm của bạn đã được mở khóa bởi Giảng viên, hãy kiểm tra điểm của mình trên hệ thống !'
+        recipient_list = [user.email]
+        send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
+
+        return Response(data=ScoreSerializer(score).data, status=status.HTTP_200_OK)
+    
             
 class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)

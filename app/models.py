@@ -19,7 +19,7 @@ class Course (BaseModel):
 
 
 class User(AbstractUser):
-    # avatar = models.ImageField
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     className = models.CharField(max_length=255, unique=False, null=True)    
     courses = models.ManyToManyField(Course, related_name="users")
     # is_superuser = models.BooleanField(default=False, editable=False)
@@ -36,6 +36,7 @@ class Score (BaseModel):
     score3 = models.FloatField(null=True, blank=True, default=None)
     score4 = models.FloatField(null=True, blank=True, default=None)
     score5 = models.FloatField(null=True, blank=True, default=None)
+    is_draft = models.BooleanField(default=False)
 
     def __str__(self):
         return 'midterm_score={0}, final_score={1}'.format(self.midterm_score, self.final_score)

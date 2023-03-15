@@ -5,14 +5,14 @@ from .models import Course, Score, User
 class CourseSerializer(ModelSerializer):    
     class Meta:
         model = Course
-        fields = ['id', 'name', 'created_date', 'updated_date']
+        fields = '__all__'
 
 
 class UserSerializer(ModelSerializer):
     # courses = CourseSerializer(many=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'password', 'email', 'is_staff', 'is_superuser', 'className', 'date_joined']
+        fields = '__all__'
         extra_kwargs = {
             'password': {'write_only': 'true'}
         }
