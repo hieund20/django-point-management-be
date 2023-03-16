@@ -45,12 +45,6 @@ class ScoreViewSet(viewsets.ModelViewSet):
         else:
             return Response(data=_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         
-    def update(self, request, pk=None):
-        score = get_object_or_404(Score, pk=pk)
-        score.is_draft = True
-        score.save()
-        return Response(data=self.serializer_class(score).data, status=status.HTTP_200_OK)
-        
     @action(methods=['get'], detail=False)
     def get_score_by_user_and_course(self, request, *args, **kwargs):
         user_id = request.query_params.get('user_id')
