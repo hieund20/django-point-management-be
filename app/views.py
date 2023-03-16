@@ -59,11 +59,15 @@ class ScoreViewSet(viewsets.ModelViewSet):
         score.save(update_fields=['active'])
 
         # send email to current user
-        user = request.user
+        user_id = request.query_params.get('user_send_email_id')
+        user = get_object_or_404(User, pk=user_id)
         subject = f'Thông báo về việc khóa điểm của sinh viên {user.last_name} {user.first_name}'
-        message = f'Điểm của bạn đã bị khóa bởi Giảng viên !'
+        message = f'Điểm của bạn đã bị khóa bởi Giảng viên ! Vui lòng kiểm tra điểm trên hệ thống'
         recipient_list = [user.email]
-        send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
+        try:
+            send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
+        except Exception as e:
+            print(f"Failed to send email: {str(e)}")
 
         return Response(data=ScoreSerializer(score).data, status=status.HTTP_200_OK)
     
@@ -74,9 +78,10 @@ class ScoreViewSet(viewsets.ModelViewSet):
         score.save(update_fields=['active'])
 
         # send email to current user
-        user = request.user
+        user_id = request.query_params.get('user_send_email_id')
+        user = get_object_or_404(User, pk=user_id)
         subject = f'Thông báo về việc mở khóa điểm của sinh viên {user.last_name} {user.first_name}'
-        message = f'Điểm của bạn đã được mở khóa bởi Giảng viên, hãy kiểm tra điểm của mình trên hệ thống !'
+        message = f'Điểm của bạn đã được mở khóa bởi Giảng viên, Vui lòng kiểm tra điểm của mình trên hệ thống !'
         recipient_list = [user.email]
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
 
