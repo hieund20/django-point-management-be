@@ -9,5 +9,6 @@ router.register('user', views.UserViewSet, basename='user')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('csv-handle/import-score/', views.CSVHandleView.as_view(), name='csv_handle'),
+    path('csv-handle/score/', views.CSVHandleView.as_view(), name='csv_handle'),
+    path('pdf-handle/score/', views.PDFHandleView.as_view(), name='pdf_handle'),
 ]

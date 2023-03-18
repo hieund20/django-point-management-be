@@ -9,9 +9,16 @@ from rest_framework.parsers import MultiPartParser, FileUploadParser
 from drf_yasg.utils import swagger_auto_schema
 # csv
 import csv
-from io import TextIOWrapper
+from io import TextIOWrapper, BytesIO
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from time import strftime
+# pdf
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Table, TableStyle
 # email
 from django.core.mail import send_mail
 from django.conf import settings
@@ -139,11 +146,11 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
         return Response(data=UserSerializer(u, many=True).data, status=status.HTTP_200_OK)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class CSVHandleView(generics.CreateAPIView):
+class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
     parser_classes = (FileUploadParser, MultiPartParser)
     serializer_class = ScoreSerializer
 
-    @swagger_auto_schema(operation_description='Upload file...',)
+    @swagger_auto_schema(operation_description='Import score list from csv file',)
     def post(self, request, *args, **kwargs):
         csv_file = request.data.get('file')
         course_id = request.query_params.get('course_id')
@@ -200,8 +207,108 @@ class CSVHandleView(generics.CreateAPIView):
         print("score", list_score)
         # Save to database
         Score.objects.bulk_create(list_score)
-        return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)    
+        return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)   
+
+
+    @swagger_auto_schema(operation_description='Export score list to csv file',)
+    def get(self, request, *args, **kwargs): 
+        course_id = request.query_params.get('course_id')
+        headers = ['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'user_id']
+        file_name = f"scores_{strftime('%Y-%m-%d-%H-%M')}"
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{file_name}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(headers)
+
+        scores = Score.objects.filter(course_id=course_id)
+        for score in scores:
+            writer.writerow([
+                score.score1,
+                score.score2,
+                score.score3,
+                score.score4,
+                score.score5,
+                score.midterm_score,
+                score.final_score,
+                score.user_id,
+                score.course_id
+            ])
+
+        return response
     
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PDFHandleView(generics.RetrieveAPIView):
+    parser_classes = (FileUploadParser, MultiPartParser)
+    serializer_class = ScoreSerializer
+
+    @swagger_auto_schema(operation_description='Import score list from csv file',)
+    def get(self, request, *args, **kwargs):
+        course_id = request.query_params.get('course_id')
+
+        # Create the HttpResponse object with PDF header
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="scores_report.pdf"'
+
+        # Create a file-like buffer to receive PDF data.
+        buffer = BytesIO()
+        # Create the PDF object, using the buffer as its "file."
+        c = canvas.Canvas(buffer, pagesize=landscape(letter))
+
+        # Define the table headers
+        table_headers = ['Score 1', 'Score 2', 'Score 3', 'Score 4', 'Score 5', 'Midterm Score', 'Final Score', 'Course', 'User']
+
+        scores = Score.objects.filter(course_id=course_id)
+        # Define the table data
+        table_data = []
+        for score in scores:
+            table_data.append([
+                score.score1 or '',
+                score.score2 or '',
+                score.score3 or '',
+                score.score4 or '',
+                score.score5 or '',
+                score.midterm_score or '',
+                score.final_score or '',
+                score.course.name,
+                score.user.email
+            ])
+        
+         # Create the table and add the style
+        table = Table([table_headers] + table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Add the table to the PDF
+        table.wrapOn(c, inch, inch)
+        table.drawOn(c, inch, inch)
+
+        # Close the PDF object cleanly, and we're done.
+        c.showPage()
+        c.save()
+        
+        # Get the value of the BytesIO buffer and write it to the response.
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+
+        return response
+
 
 def index(request):
     return HttpResponse("e-Course App")
