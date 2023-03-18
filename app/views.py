@@ -123,7 +123,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             first_name = ""
         if not last_name:
             last_name = ""
-            
+
         users = User.objects.filter(courses=course_id).filter(first_name__icontains=first_name, last_name__icontains=last_name)
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -141,46 +141,65 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class CSVHandleView(generics.CreateAPIView):
     parser_classes = (FileUploadParser, MultiPartParser)
+    serializer_class = ScoreSerializer
 
     @swagger_auto_schema(operation_description='Upload file...',)
     def post(self, request, *args, **kwargs):
         csv_file = request.data.get('file')
+        course_id = request.query_params.get('course_id')
 
         if not csv_file.name.endswith('.csv'):
             return Response({'message': 'File không phải định dạng CSV'}, status=status.HTTP_400_BAD_REQUEST)    
 
         # read the CSV file and create instances of your model
         decoded_file = csv_file.read().decode('utf-8').splitlines()
-        print('decoded_file 1', decoded_file)
-        print('decoded_file', decoded_file[5:])
+        # remove 5 first item in list
+        decoded_file_final = decoded_file[5:]
+        # remove 2 last item in list
+        decoded_file_final = decoded_file_final[:2]
+        print('decoded_file 1', decoded_file_final)
         reader = csv.DictReader(
-            decoded_file[5:], 
+            decoded_file_final, 
             fieldnames=['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'course_id', 'user_id']
         )
-        print('reader', reader)
-        next(reader)  # Skip read csv header
-        print('reader 2', reader)
+        # next(reader)  # Skip read csv header
+        list_score = []
 
-        #still have error
         for line in reader:
             try:
                 values = list(line.values()) 
+                print("values", values)
                 score = Score()
-                score.score1 = values[0]  
-                score.score2 = values[1] 
-                score.score3  = values[2] 
-                score.score4 = values[3] 
-                score.score5 = values[4]
-                score.midterm_score = values[5]
-                score.final_score = values[6]
-                score.user = User.objects.filter(pk=values[7]).first() 
-                score.course = Course.objects.filter(pk=values[8]).first()
-                # Save to database
-                Score.objects.create(**score)
+                score.score1 = values[0] if values[0].isdigit() else None
+                score.score2 = values[1] if values[1].isdigit() else None
+                score.score3  = values[2] if values[2].isdigit() else None
+                score.score4 = values[3] if values[3].isdigit() else None
+                score.score5 = values[4] if values[4].isdigit() else None
+
+                if values[5].isdigit():
+                    score.midterm_score = values[5] 
+                else:
+                    return Response({'message': 'Thiếu điểm giữa kỳ hoặc điểm giữa kỳ không phải số'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                if values[6].isdigit():
+                    score.final_score = values[6] 
+                else:
+                    return Response({'message': 'Thiếu điểm cuối kỳ hoặc điểm cuối kỳ không phải số'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                if values[8].isdigit():
+                    score.user = User.objects.filter(pk=values[8]).first() 
+                else:
+                    return Response({'message': 'Thiếu UserID hoặc UserID không phải số'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                score.course = Course.objects.filter(pk=course_id).first()
+                list_score.append(score)
             except KeyError as e:
                 print(f"KeyError: {e}")
                 return Response({'message': 'Có lỗi xảy ra khi Import'}, status=status.HTTP_400_BAD_REQUEST)
 
+        print("score", list_score)
+        # Save to database
+        Score.objects.bulk_create(list_score)
         return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)    
     
 
