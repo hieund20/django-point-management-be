@@ -85,7 +85,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'student_point_management_system_be.urls'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
