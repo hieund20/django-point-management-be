@@ -87,6 +87,8 @@ ROOT_URLCONF = 'student_point_management_system_be.urls'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+CORS_ALLOW_ALL_HEADERS = True
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
