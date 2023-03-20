@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Score, Course, User
-from .serializers import ScoreSerializer, CourseSerializer, UserSerializer
+from .models import Score, Course, User, ForumPost
+from .serializers import ScoreSerializer, CourseSerializer, UserSerializer, ForumPostSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FileUploadParser
 from drf_yasg.utils import swagger_auto_schema
@@ -145,6 +145,19 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
         u = User.objects.filter(courses=pk)
         return Response(data=UserSerializer(u, many=True).data, status=status.HTTP_200_OK)
     
+class ForumPostViewSet(viewsets.ModelViewSet, generics.ListAPIView):
+    queryset = ForumPost.objects.filter(active=True)
+    serializer_class = ForumPostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    @action(methods=['get'], detail=False)
+    def get_forum_post_by_course_id(self, request, *args, **kwargs):
+        course_id = request.query_params.get('course_id')
+        forum = ForumPost.objects.filter(course=course_id)
+        
+        return Response(data=ForumPostSerializer(forum, many=True).data, status=status.HTTP_200_OK)
+    
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
     parser_classes = (FileUploadParser, MultiPartParser)

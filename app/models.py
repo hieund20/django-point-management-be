@@ -45,7 +45,8 @@ class Score (BaseModel):
 class ForumPost (BaseModel):
     title = models.CharField(max_length=255, unique=True)
     body = models.CharField(max_length=255, unique=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, default=None)
 
     def __str__(self):
         return self.title
