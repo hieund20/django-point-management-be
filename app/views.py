@@ -206,8 +206,8 @@ class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
                 else:
                     return Response({'message': 'Thiếu điểm cuối kỳ hoặc điểm cuối kỳ không phải số'}, status=status.HTTP_400_BAD_REQUEST)
                 
-                if values[8].isdigit():
-                    score.user = User.objects.filter(pk=values[8]).first() 
+                if values[7].isdigit():
+                    score.user = User.objects.filter(pk=values[7]).first() 
                 else:
                     return Response({'message': 'Thiếu UserID hoặc UserID không phải số'}, status=status.HTTP_400_BAD_REQUEST)
                 
