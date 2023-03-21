@@ -85,12 +85,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'student_point_management_system_be.urls'
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # replace with your React app's URL
+    'https://django-point-management-fe.vercel.app',  # add your production app's URL
+]
 
-CORS_ORIGIN_ALLOW_ALL = True
-
-CORS_ALLOW_ALL_HEADERS = True
-
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 TEMPLATES = [
     {
