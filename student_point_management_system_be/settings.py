@@ -94,6 +94,7 @@ CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
     'authorization',
+    'content-disposition', # Add 'content-disposition' to the allowed headers
     'content-type',
     'dnt',
     'origin',
