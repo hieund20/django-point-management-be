@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
+
+
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -9,7 +11,7 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
-            
+
 
 class Course (BaseModel):
     name = models.CharField(max_length=255, unique=True)
@@ -20,7 +22,7 @@ class Course (BaseModel):
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    className = models.CharField(max_length=255, unique=False, null=True)    
+    className = models.CharField(max_length=255, unique=False, null=True)
     courses = models.ManyToManyField(Course, related_name="users")
     # is_superuser = models.BooleanField(default=False, editable=False)
     pass
@@ -50,3 +52,13 @@ class ForumPost (BaseModel):
 
     def __str__(self):
         return self.title
+
+
+class ForumPostAnswer (BaseModel):
+    body = models.CharField(max_length=255, unique=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
+    forum_post = models.ForeignKey(
+        ForumPost, on_delete=models.PROTECT, default=None)
+
+    def __str__(self):
+        return self.body
