@@ -7,6 +7,7 @@ router.register('score', views.ScoreViewSet, basename='score')
 router.register('course', views.CourseViewSet, basename='course')
 router.register('user', views.UserViewSet, basename='user')
 router.register('forumPost', views.ForumPostViewSet, basename='forumPost')
+router.register('forumPostAnswer', views.ForumPostAnswerViewSet, basename='forumPostAnswer')
 
 urlpatterns = [
     path('', include(router.urls)),

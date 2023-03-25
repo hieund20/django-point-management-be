@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Score, Course, User, ForumPost
-from .serializers import ScoreSerializer, CourseSerializer, UserSerializer, ForumPostSerializer
+from .models import Score, Course, User, ForumPost, ForumPostAnswer
+from .serializers import ScoreSerializer, CourseSerializer, UserSerializer, ForumPostSerializer, ForumPostAnswerSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FileUploadParser
 from drf_yasg.utils import swagger_auto_schema
@@ -156,7 +156,19 @@ class ForumPostViewSet(viewsets.ModelViewSet, generics.ListAPIView):
         forum = ForumPost.objects.filter(course=course_id)
         
         return Response(data=ForumPostSerializer(forum, many=True).data, status=status.HTTP_200_OK)
+
+
+class ForumPostAnswerViewSet(viewsets.ModelViewSet, generics.ListAPIView):
+    queryset = ForumPostAnswer.objects.filter(active=True)
+    serializer_class = ForumPostAnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
+    @action(methods=['get'], detail=False)
+    def get_forum_post_answer_by_forum_post_id(self, request, *args, **kwargs):
+        forum_post_id = request.query_params.get('forum_post_id')
+        forum = ForumPostAnswer.objects.filter(forum_post=forum_post_id)
+        
+        return Response(data=ForumPostAnswerSerializer(forum, many=True).data, status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
