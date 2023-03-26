@@ -18,12 +18,12 @@ class UserSerializer(ModelSerializer):
             'password': {'write_only': 'true'}
         }
 
-    # def create(self, validated_data):
-    #     user = User.objects.create(**validated_data)
-    #     user.set_password(validated_data['password'])
-    #     user.save()
+    def create(self, validated_data):
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
 
-    #     return user
+        return user
 
 
 class ScoreSerializer(ModelSerializer):

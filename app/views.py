@@ -95,7 +95,7 @@ class ScoreViewSet(viewsets.ModelViewSet):
         return Response(data=ScoreSerializer(score).data, status=status.HTTP_200_OK)
     
             
-class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView):
+class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -135,25 +135,24 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def create(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
+        url = request.path
+        id_str = url.split('/')[-2] # Get the second-to-last element of the URL
+        id = int(id_str)
+
         data = request.data
-        new_user = User.objects.create(
-            first_name=data["first_name"], 
-            last_name=data["last_name"],
-            email=data["email"],
-            password=data["password"],
-            avatar=data["avatar"])
-        new_user.set_password(data['password'])
-        new_user.save()
+        update_user = User.objects.get(pk=id)
+        update_user.avatar = data["avatar"]
         
         course_list = data.getlist('courses')
         for course_id in course_list:
             course_obj = Course.objects.get(pk=course_id)
-            new_user.courses.add(course_obj)
+            update_user.courses.add(course_obj)
 
-        serializer = UserSerializer(new_user) 
+        update_user.save()
+        serializer = UserSerializer(update_user) 
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
+    
 
 class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
     queryset = Course.objects.filter(active=True)
@@ -209,7 +208,6 @@ class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
         decoded_file_final = decoded_file[5:]
         # remove 2 last item in list
         decoded_file_final = decoded_file_final[:2]
-        print('decoded_file 1', decoded_file_final)
         reader = csv.DictReader(
             decoded_file_final, 
             fieldnames=['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'course_id', 'user_id']
@@ -220,7 +218,6 @@ class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
         for line in reader:
             try:
                 values = list(line.values()) 
-                print("values", values)
                 score = Score()
                 score.score1 = values[0] if values[0].isdigit() else None
                 score.score2 = values[1] if values[1].isdigit() else None
@@ -249,7 +246,6 @@ class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
                 print(f"KeyError: {e}")
                 return Response({'message': 'Có lỗi xảy ra khi Import'}, status=status.HTTP_400_BAD_REQUEST)
 
-        print("score", list_score)
         # Save to database
         Score.objects.bulk_create(list_score)
         return Response({'message': 'Import thành công'}, status=status.HTTP_200_OK)   
