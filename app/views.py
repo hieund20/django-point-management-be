@@ -134,6 +134,26 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         users = User.objects.filter(courses=course_id).filter(first_name__icontains=first_name, last_name__icontains=last_name)
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        new_user = User.objects.create(
+            first_name=data["first_name"], 
+            last_name=data["last_name"],
+            email=data["email"],
+            password=data["password"],
+            avatar=data["avatar"])
+        new_user.set_password(data['password'])
+        new_user.save()
+        
+        course_list = data.getlist('courses')
+        for course_id in course_list:
+            course_obj = Course.objects.get(pk=course_id)
+            new_user.courses.add(course_obj)
+
+        serializer = UserSerializer(new_user) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
     queryset = Course.objects.filter(active=True)

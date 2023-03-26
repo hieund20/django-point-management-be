@@ -9,7 +9,8 @@ class CourseSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    courses = CourseSerializer(many=True)
+    courses = CourseSerializer(many=True, required=False)
+
     class Meta:
         model = User
         fields = '__all__'
@@ -17,22 +18,12 @@ class UserSerializer(ModelSerializer):
             'password': {'write_only': 'true'}
         }
 
-    def create(self, validated_data):
-        print("validated_data", validated_data)
-        courses_data = validated_data['courses'] # Remove courses from validated_data
-        print("courses_data", courses_data)
-        user = User.objects.create(**validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
+    # def create(self, validated_data):
+    #     user = User.objects.create(**validated_data)
+    #     user.set_password(validated_data['password'])
+    #     user.save()
 
-        if courses_data:
-            courses = []
-            for course_data in courses_data:
-                course, _ = Course.objects.get_or_create(**course_data)
-                courses.append(course)
-            user.courses.add(*courses)
-
-        return user
+    #     return user
 
 
 class ScoreSerializer(ModelSerializer):
