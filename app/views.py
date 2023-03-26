@@ -141,6 +141,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             first_name=data["first_name"], 
             last_name=data["last_name"],
             email=data["email"],
+            username=data["username"],
             password=data["password"],
             avatar=data["avatar"])
         new_user.set_password(data['password'])
