@@ -174,10 +174,10 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView):
+class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Course.objects.filter(active=True)
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     @action(methods=['get'], detail=True)
     def get_member(self, request, pk):
