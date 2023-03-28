@@ -10,20 +10,23 @@ class CourseSerializer(ModelSerializer):
 
 class UserSerializer(ModelSerializer):
     courses = CourseSerializer(many=True, required=False)
+    avatar_url = SerializerMethodField(source='avatar')
+
+    def get_image(self, user):
+        if user.avatar:
+            request = self.context.get('request')
+            return request.build_absolute_uri('/static/%s' % user.avatar.name) if request else ''
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'username', 'password',
+                  'first_name', 'last_name', 'is_active', 'courses',
+                  'created_date', 'updated_date', 'is_superuser',
+                  'email', 'email',  'avatar', 'avatar_url']
         extra_kwargs = {
-            'password': {'write_only': 'true'}
+            'avatar': {'write_only': True},
+            'password': {'write_only': True}
         }
-
-    # def create(self, validated_data):
-    #     user = User(**validated_data)
-    #     user.set_password(validated_data['password'])
-    #     user.save()
-
-    #     return user
 
 
 class ScoreSerializer(ModelSerializer):
