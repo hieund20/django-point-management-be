@@ -12,7 +12,7 @@ class UserSerializer(ModelSerializer):
     courses = CourseSerializer(many=True, required=False)
     avatar_url = SerializerMethodField(source='avatar')
 
-    def get_image(self, user):
+    def get_avatar_url(self, user):
         if user.avatar:
             request = self.context.get('request')
             return request.build_absolute_uri('/static/%s' % user.avatar.name) if request else ''
