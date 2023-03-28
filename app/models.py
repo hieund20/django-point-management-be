@@ -21,7 +21,7 @@ class Course (BaseModel):
 
 
 class User(AbstractUser):
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='users/%Y/%m', blank=True, null=True)
     courses = models.ManyToManyField(Course, related_name="users")
     pass
 
