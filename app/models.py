@@ -15,6 +15,7 @@ class BaseModel(models.Model):
 
 class Course (BaseModel):
     name = models.CharField(max_length=255, unique=True)
+    content = models.TextField(null=True)
 
     def __str__(self):
         return self.name
