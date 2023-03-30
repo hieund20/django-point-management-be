@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from .models import Score, Course, User, ForumPost, ForumPostAnswer
 from .serializers import ScoreSerializer, CourseSerializer, UserSerializer, ForumPostSerializer, ForumPostAnswerSerializer
 from django.shortcuts import get_object_or_404
@@ -187,7 +188,15 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView, generics.Li
     @action(methods=['get'], detail=True)
     def get_member(self, request, pk):
         u = User.objects.filter(courses=pk)
-        return Response(data=UserSerializer(u, many=True).data, status=status.HTTP_200_OK)
+
+        class CustomPagination(PageNumberPagination):
+            page_size = 5
+        
+        paginator = CustomPagination()
+        result_page = paginator.paginate_queryset(u, request)
+        serializer = UserSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
     
 class ForumPostViewSet(viewsets.ModelViewSet, generics.ListAPIView):
     queryset = ForumPost.objects.filter(active=True)
