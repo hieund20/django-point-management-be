@@ -137,9 +137,15 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         if not last_name:
             last_name = ""
 
-        users = User.objects.filter(courses=course_id).filter(first_name__icontains=first_name, last_name__icontains=last_name)
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        class CustomPagination(PageNumberPagination):
+            page_size = 5
+
+        users = User.objects.filter(courses=course_id).filter(first_name__icontains=first_name, last_name__icontains=last_name)    
+        paginator = CustomPagination()
+        result_page = paginator.paginate_queryset(users, request)
+        serializer = UserSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
     
     def create(self, request, *args, **kwargs):
         data = request.data
