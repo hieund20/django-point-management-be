@@ -190,6 +190,13 @@ class CourseViewSet(viewsets.ModelViewSet, generics.RetrieveAPIView, generics.Li
     queryset = Course.objects.filter(active=True)
     serializer_class = CourseSerializer
     permission_classes = [permissions.AllowAny]
+
+    def filter_queryset(self, queryset):
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            queryset = queryset.filter(users__id=user_id)
+
+        return queryset
     
     @action(methods=['get'], detail=True)
     def get_member(self, request, pk):
