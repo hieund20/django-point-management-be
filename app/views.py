@@ -8,6 +8,7 @@ from .serializers import ScoreSerializer, CourseSerializer, UserSerializer, Foru
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FileUploadParser
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 # csv
 import csv
 from io import TextIOWrapper, BytesIO
@@ -104,6 +105,8 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
+        if self.action == 'get_user_by_email':
+            return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
     
     @action(methods=['get'], detail=True)
@@ -146,6 +149,19 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = UserSerializer(result_page, many=True)
 
         return paginator.get_paginated_response(serializer.data)
+    
+    @action(methods=['get'], detail=False)
+    def get_user_by_email(self, request, *args, **kwargs):
+        email = request.query_params.get('email')
+
+        if not email:
+            return Response({'message': 'Email là bắt buộc'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response(data={}, status=status.HTTP_200_OK)
+
+        return Response(data=UserSerializer(user).data, status=status.HTTP_200_OK)
     
     def create(self, request, *args, **kwargs):
         data = request.data
