@@ -39,6 +39,8 @@ class ScoreSerializer(ModelSerializer):
 
 
 class ForumPostSerializer(ModelSerializer):
+    user = UserSerializer()
+    
     def create(self, validated_data):
         obj = ForumPost.objects.create(**validated_data)
         return obj
