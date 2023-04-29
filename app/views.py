@@ -163,6 +163,26 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
         return Response(data=UserSerializer(user).data, status=status.HTTP_200_OK)
     
+    @action(methods=['get'], detail=False)
+    def get_user_by_id(self, request, *args, **kwargs):
+        id = request.query_params.get('id')
+        course_id = request.query_params.get('course_id')
+
+        if not course_id:
+            return Response({'message': 'Thiếu ID khóa học'}, status=status.HTTP_400_BAD_REQUEST)
+        if not id:
+            return Response({'message': 'Thiếu ID người dùng'}, status=status.HTTP_400_BAD_REQUEST)
+
+        class CustomPagination(PageNumberPagination):
+            page_size = 5
+
+        users = User.objects.filter(id=id, courses=course_id)    
+        paginator = CustomPagination()
+        result_page = paginator.paginate_queryset(users, request)
+        serializer = UserSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
+    
     def create(self, request, *args, **kwargs):
         data = request.data
         new_user = User.objects.create(
