@@ -317,7 +317,7 @@ class CSVHandleView(generics.CreateAPIView, generics.RetrieveAPIView):
     @swagger_auto_schema(operation_description='Export score list to csv file',)
     def get(self, request, *args, **kwargs): 
         course_id = request.query_params.get('course_id')
-        headers = ['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'user_id']
+        headers = ['score1', 'score2', 'score3', 'score4', 'score5', 'midterm_score', 'final_score', 'user_id', 'course_id']
         file_name = f"scores_{strftime('%Y-%m-%d-%H-%M')}"
 
         response = HttpResponse(content_type='text/csv')
