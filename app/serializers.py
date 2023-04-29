@@ -51,7 +51,7 @@ class ForumPostSerializer(ModelSerializer):
 
 
 class ForumPostAnswerSerializer(ModelSerializer):
-    user = UserSerializer()
+    # user = UserSerializer()
 
     def create(self, validated_data):
         obj = ForumPostAnswer.objects.create(**validated_data)
