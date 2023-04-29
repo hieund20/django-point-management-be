@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, StringRelatedField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, StringRelatedField, IntegerField
 from .models import Course, Score, User, ForumPost, ForumPostAnswer
 
 
@@ -39,7 +39,7 @@ class ScoreSerializer(ModelSerializer):
 
 
 class ForumPostSerializer(ModelSerializer):
-    user = UserSerializer(many=False)
+    user = IntegerField()
 
     def create(self, validated_data):
         obj = ForumPost.objects.create(**validated_data)
