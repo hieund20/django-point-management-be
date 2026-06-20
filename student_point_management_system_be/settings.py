@@ -132,7 +132,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cr2satbvl31yogrg' if IS_HEROKU == True else 'student_point_management_db',
         'USER': 'hhng96gvnmbzverw' if IS_HEROKU == True else 'root',
-        'PASSWORD': 'tf9ruc6tcblujx45' if IS_HEROKU == True else 'Duchieu200301',
+        'PASSWORD': 'tf9ruc6tcblujx45' if IS_HEROKU == True else 'xxxxxx',
         'HOST': 's29oj5odr85rij2o.cbetxkdyhwsb.us-east-1.rds.amazonaws.com' if IS_HEROKU == True else ''
     }
 }
@@ -179,7 +179,7 @@ STATIC_URL = 'static/'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'hieund898@gmail.com'
+EMAIL_HOST_USER = 'abc@gmail.com'
 EMAIL_HOST_PASSWORD = 'uzeovvjhqtclamfq'
 EMAIL_PORT = 587
 
